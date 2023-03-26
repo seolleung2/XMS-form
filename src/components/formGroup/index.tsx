@@ -4,6 +4,8 @@ import dayjs from 'dayjs';
 import Input from '@components/input';
 import Button from '@components/button';
 import RangePicker from '@components/rangePicker';
+import SelectInput from '@components/selectInput';
+import { ITEM_SELECTION, SUPPLY_SELECTION } from 'constant/form';
 
 const FormGroup: FunctionComponent = () => {
   const methods = useFormContext();
@@ -11,11 +13,24 @@ const FormGroup: FunctionComponent = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { isDirty, errors, isSubmitting },
   } = methods;
 
+  const [itemField, itemDetailField] = watch(['item', 'itemDetail']);
+  const [supplyField, supplyDetailField] = watch(['supply', 'supplyDetail']);
+
   const onSubmit = (data: FieldValues) => {
-    const { name, phoneNumber, fromDate, toDate } = data;
+    const {
+      name,
+      phoneNumber,
+      fromDate,
+      toDate,
+      item,
+      itemDetail,
+      supply,
+      supplyDetail,
+    } = data;
 
     const fromDateString = dayjs(fromDate).toISOString().split('T')[0];
     const toDateString = dayjs(toDate).toISOString().split('T')[0];
@@ -25,6 +40,10 @@ const FormGroup: FunctionComponent = () => {
       phoneNumber,
       fromDate: fromDateString,
       toDate: toDateString,
+      item,
+      itemDetail,
+      supply,
+      supplyDetail,
     };
 
     console.log('body', body);
@@ -85,6 +104,24 @@ const FormGroup: FunctionComponent = () => {
           })}
         />
         <RangePicker label="날짜" className="mb-4" />
+        <SelectInput
+          label="품목"
+          className="mb-4"
+          item="item"
+          itemDetail="itemDetail"
+          itemField={itemField}
+          itemDetailField={itemDetailField}
+          options={ITEM_SELECTION}
+        />
+        <SelectInput
+          label="물량"
+          className="mb-4"
+          item="supply"
+          itemDetail="supplyDetail"
+          itemField={supplyField}
+          itemDetailField={supplyDetailField}
+          options={SUPPLY_SELECTION}
+        />
       </div>
       <div className="addButton mt-1.5">
         <Button text="등록" className="" />

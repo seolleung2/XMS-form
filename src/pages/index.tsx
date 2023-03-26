@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
+import { Button } from 'antd';
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       헬로월드
       <Input placeholder="box" />
       <MyDiv>Test Text</MyDiv>
+      <Button type="primary">Button</Button>
     </main>
   );
 }

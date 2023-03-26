@@ -39,3 +39,13 @@ export interface ReqPlaceFields {
 export interface OrderFields extends ReqBody {
   seqNo: number;
 }
+
+export interface ResponseType {
+  orders: OrderFields[];
+  total: number;
+}
+
+export interface PageType {
+  page: number;
+  size: number;
+}

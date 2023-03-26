@@ -1,13 +1,17 @@
 import React, { FunctionComponent, useState } from 'react';
-import { FieldValues, useFormContext } from 'react-hook-form';
+import { FieldValues, useFormContext, useFieldArray } from 'react-hook-form';
 import DaumPostcode from 'react-daum-postcode';
 import dayjs from 'dayjs';
+import styled from '@emotion/styled';
 import Input from '@components/input';
 import Button from '@components/button';
 import Modal from '@components/modal';
 import RangePicker from '@components/rangePicker';
 import SelectInput from '@components/selectInput';
+import DatePickerField from '@components/datePicker';
 import { ITEM_SELECTION, SUPPLY_SELECTION } from 'constant/form';
+import { LoadPlaceFields } from 'types/form';
+import { cls } from 'utils';
 
 const FormGroup: FunctionComponent = () => {
   const methods = useFormContext();
@@ -17,8 +21,14 @@ const FormGroup: FunctionComponent = () => {
     watch,
     clearErrors,
     setValue,
+    control,
     formState: { isDirty, errors, isSubmitting },
   } = methods;
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'loadPlace',
+  });
 
   const [openPostcode, setOpenPostcode] = useState<boolean>(false);
   const [addressInputId, setAddressInputId] = useState<string>('');
@@ -35,10 +45,24 @@ const FormGroup: FunctionComponent = () => {
       itemDetail,
       supply,
       supplyDetail,
+      address,
+      loadPlace,
     } = data;
 
     const fromDateString = dayjs(fromDate).toISOString().split('T')[0];
     const toDateString = dayjs(toDate).toISOString().split('T')[0];
+
+    const loadingPlaceConversion = loadPlace.map(
+      (placeInfo: LoadPlaceFields) => {
+        const { date } = placeInfo;
+        const convertedDate = dayjs(date).toISOString().split('T')[0];
+
+        return {
+          ...placeInfo,
+          date: convertedDate,
+        };
+      }
+    );
 
     const body = {
       name,
@@ -49,6 +73,8 @@ const FormGroup: FunctionComponent = () => {
       itemDetail,
       supply,
       supplyDetail,
+      address,
+      loadPlace: loadingPlaceConversion,
     };
 
     console.log('body', body);
@@ -83,81 +109,178 @@ const FormGroup: FunctionComponent = () => {
         })}
       >
         <div className="formGroup">
-          <Input
-            label="이름"
-            id="name"
-            className="mb-4"
-            autoFocus
-            maxLength={20}
-            aria-invalid={!isDirty ? undefined : errors.name ? 'true' : 'false'}
-            message={errors['name']?.message as string}
-            {...register('name', {
-              required: '값을 입력 해주세요.',
-              validate: (value) => {
-                const check = /^[가-힣a-zA-Z\s]+$/;
+          <div className="flex flex-col flex-wrap">
+            <div>
+              <Input
+                label="이름"
+                id="name"
+                className="mb-4"
+                autoFocus
+                maxLength={20}
+                aria-invalid={
+                  !isDirty ? undefined : errors.name ? 'true' : 'false'
+                }
+                message={errors['name']?.message as string}
+                {...register('name', {
+                  required: '값을 입력 해주세요.',
+                  validate: (value) => {
+                    const check = /^[가-힣a-zA-Z\s]+$/;
 
-                if (!check.test(value))
-                  return '한글, 영어, 공백만 입력 가능 합니다.';
-              },
-            })}
-          />
-          <Input
-            label="휴대폰 번호"
-            id="phoneNumber"
-            className="mb-4"
-            maxLength={13}
-            aria-invalid={!isDirty ? undefined : errors.name ? 'true' : 'false'}
-            message={errors['phoneNumber']?.message as string}
-            {...register('phoneNumber', {
-              required: '값을 입력 해주세요.',
-              validate: (value) => {
-                const check = /^([0-9]{3})-?([0-9]{4})-?([0-9]{4})$/;
+                    if (!check.test(value))
+                      return '한글, 영어, 공백만 입력 가능 합니다.';
+                  },
+                })}
+              />
+              <Input
+                label="휴대폰 번호"
+                id="phoneNumber"
+                className="mb-4"
+                maxLength={13}
+                aria-invalid={
+                  !isDirty ? undefined : errors.name ? 'true' : 'false'
+                }
+                message={errors['phoneNumber']?.message as string}
+                {...register('phoneNumber', {
+                  required: '값을 입력 해주세요.',
+                  validate: (value) => {
+                    const check = /^([0-9]{3})-?([0-9]{4})-?([0-9]{4})$/;
 
-                if (!check.test(value))
-                  return '알맞는 핸드폰 번호 형식을 입력 해주세요.';
+                    if (!check.test(value))
+                      return '알맞는 핸드폰 번호 형식을 입력 해주세요.';
 
-                setValue(
-                  'phoneNumber',
-                  value
-                    .replace(/^(\d{3})(\d{4})(\d{4})$/g, '$1-$2-$3')
-                    .replace(/-{1,2}$/g, '')
+                    setValue(
+                      'phoneNumber',
+                      value
+                        .replace(/^(\d{3})(\d{4})(\d{4})$/g, '$1-$2-$3')
+                        .replace(/-{1,2}$/g, '')
+                    );
+                  },
+                })}
+              />
+              <RangePicker label="날짜" className="mb-4" />
+              <SelectInput
+                label="품목"
+                className="mb-4"
+                item="item"
+                itemDetail="itemDetail"
+                itemField={itemField}
+                itemDetailField={itemDetailField}
+                options={ITEM_SELECTION}
+              />
+              <SelectInput
+                label="물량"
+                className="mb-4"
+                item="supply"
+                itemDetail="supplyDetail"
+                itemField={supplyField}
+                itemDetailField={supplyDetailField}
+                options={SUPPLY_SELECTION}
+              />
+              <Input
+                label="출근지"
+                id="address"
+                className="mb-4"
+                readOnly
+                aria-invalid={
+                  !isDirty ? undefined : errors.address ? 'true' : 'false'
+                }
+                message={errors['address']?.message as string}
+                onClick={() => handleOpenPostcodeModal('address')}
+                {...register('address', {
+                  required: '값을 입력 해주세요.',
+                })}
+              />
+            </div>
+            <div className="loadPlaceWrapper flex grow flex-col space-y-2">
+              {fields.map((field, index) => {
+                const loadPlaceErrors = errors['loadPlace'] as
+                  | FieldValues
+                  | undefined;
+
+                return (
+                  <LoadPlaceInfo
+                    key={field.id}
+                    className="relative h-fit w-full rounded-md p-2 lg:flex lg:flex-col lg:justify-center lg:py-8 lg:px-4"
+                  >
+                    <h3 className="mb-4">상차지 정보</h3>
+                    <span
+                      className={cls(
+                        'absolute top-2 right-2 cursor-pointer py-0.5 px-2 text-red hover:font-bold lg:top-7',
+                        index < 1 ? 'hidden' : 'block'
+                      )}
+                      onClick={() => remove(index)}
+                    >
+                      X
+                    </span>
+                    <Input
+                      label="담당자"
+                      id={`loadPlace.${index}.name`}
+                      className="mb-4 px-2.5 md:px-0"
+                      maxLength={10}
+                      aria-invalid={
+                        !isDirty || !loadPlaceErrors
+                          ? undefined
+                          : loadPlaceErrors[index]?.name
+                          ? 'true'
+                          : 'false'
+                      }
+                      message={
+                        loadPlaceErrors && loadPlaceErrors[index]?.name?.message
+                      }
+                      {...register(`loadPlace.${index}.name`, {
+                        required: '값을 입력 해주세요.',
+                        validate: (value) => {
+                          const check = /^[가-힣a-zA-Z\s]+$/;
+
+                          if (!check.test(value))
+                            return '한글, 영어, 공백만 입력 가능 합니다.';
+                        },
+                      })}
+                    />
+                    <DatePickerField
+                      name={`loadPlace.${index}.date`}
+                      className="mb-4 px-2.5 md:px-0"
+                    />
+                    <Input
+                      label="상차지"
+                      id={`loadPlace.${index}.address`}
+                      className="mb-4 px-2.5 md:px-0"
+                      readOnly
+                      aria-invalid={
+                        !isDirty || !loadPlaceErrors
+                          ? undefined
+                          : loadPlaceErrors[index]?.address
+                          ? 'true'
+                          : 'false'
+                      }
+                      message={
+                        loadPlaceErrors &&
+                        loadPlaceErrors[index]?.address?.message
+                      }
+                      onClick={() =>
+                        handleOpenPostcodeModal(`loadPlace.${index}.address`)
+                      }
+                      {...register(`loadPlace.${index}.address`, {
+                        required: '값을 입력 해주세요.',
+                      })}
+                    />
+                  </LoadPlaceInfo>
                 );
-              },
-            })}
-          />
-          <RangePicker label="날짜" className="mb-4" />
-          <SelectInput
-            label="품목"
-            className="mb-4"
-            item="item"
-            itemDetail="itemDetail"
-            itemField={itemField}
-            itemDetailField={itemDetailField}
-            options={ITEM_SELECTION}
-          />
-          <SelectInput
-            label="물량"
-            className="mb-4"
-            item="supply"
-            itemDetail="supplyDetail"
-            itemField={supplyField}
-            itemDetailField={supplyDetailField}
-            options={SUPPLY_SELECTION}
-          />
-          <Input
-            label="출근지"
-            id="address"
-            className="mb-4"
-            readOnly
-            aria-invalid={
-              !isDirty ? undefined : errors.address ? 'true' : 'false'
-            }
-            message={errors['address']?.message as string}
-            onClick={() => handleOpenPostcodeModal('address')}
-            {...register('address', {
-              required: '값을 입력 해주세요.',
-            })}
-          />
+              })}
+              <AddLoadPlaceInfo
+                totalFields={fields.length}
+                onClick={() =>
+                  append({
+                    name: '',
+                    address: '',
+                    date: 0,
+                  })
+                }
+              >
+                <span>+</span>
+              </AddLoadPlaceInfo>
+            </div>
+          </div>
         </div>
         <div className="addButton mt-1.5">
           <Button text="등록" className="" />
@@ -180,3 +303,34 @@ const FormGroup: FunctionComponent = () => {
 };
 
 export default FormGroup;
+
+const LoadPlaceInfo = styled.div`
+  background: ${({ theme }) => theme.colors.white};
+  border: 1px solid ${({ theme }) => theme.colors.gray};
+`;
+
+const AddLoadPlaceInfo = styled.div<{ totalFields: number }>`
+  display: ${({ totalFields }) => (totalFields < 3 ? 'flex' : 'none')};
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  padding: 6px 0;
+  background: ${({ theme }) => theme.colors.white};
+  border: 1px solid ${({ theme }) => theme.colors.gray};
+  border-radius: 6px;
+
+  span {
+    font-size: 32px;
+    font-weight: semibold;
+    color: 1px solid ${({ theme }) => theme.colors.primary};
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.light};
+  }
+
+  @media (min-width: 1024px) {
+    height: 314px;
+  }
+`;

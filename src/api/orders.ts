@@ -1,12 +1,7 @@
 import axios from 'axios';
+import { PageType } from 'types/form';
 
-export const getOrders = async ({
-  page,
-  size,
-}: {
-  page: number;
-  size: number;
-}) => {
+export const getOrders = async ({ page, size }: PageType) => {
   const { data } = await axios.get('/orders', {
     params: {
       page,

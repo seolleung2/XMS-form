@@ -16,8 +16,6 @@ export default function Home() {
     size: 10,
   });
 
-  console.log(orderlist);
-
   return (
     <BaseLayout>
       <FormProvider {...methods}>

@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { FieldValues, useFormContext } from 'react-hook-form';
+import dayjs from 'dayjs';
 import Input from '@components/input';
 import Button from '@components/button';
 import RangePicker from '@components/rangePicker';
@@ -9,15 +10,21 @@ const FormGroup: FunctionComponent = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { isDirty, errors, isSubmitting },
   } = methods;
 
   const onSubmit = (data: FieldValues) => {
-    const { name, phoneNumber } = data;
+    const { name, phoneNumber, fromDate, toDate } = data;
+
+    const fromDateString = dayjs(fromDate).toISOString().split('T')[0];
+    const toDateString = dayjs(toDate).toISOString().split('T')[0];
 
     const body = {
       name,
       phoneNumber,
+      fromDate: fromDateString,
+      toDate: toDateString,
     };
 
     console.log('body', body);
@@ -40,18 +47,41 @@ const FormGroup: FunctionComponent = () => {
           id="name"
           className="mb-4"
           autoFocus
+          maxLength={20}
           aria-invalid={!isDirty ? undefined : errors.name ? 'true' : 'false'}
+          message={errors['name']?.message as string}
           {...register('name', {
-            required: '이름은 필수 입력입니다.',
+            required: '값을 입력 해주세요.',
+            validate: (value) => {
+              const check = /^[가-힣a-zA-Z\s]+$/;
+
+              if (!check.test(value))
+                return '한글, 영어, 공백만 입력 가능 합니다.';
+            },
           })}
         />
         <Input
           label="휴대폰 번호"
           id="phoneNumber"
           className="mb-4"
+          maxLength={13}
           aria-invalid={!isDirty ? undefined : errors.name ? 'true' : 'false'}
+          message={errors['phoneNumber']?.message as string}
           {...register('phoneNumber', {
-            required: '전화번호는 필수 입력입니다.',
+            required: '값을 입력 해주세요.',
+            validate: (value) => {
+              const check = /^([0-9]{3})-?([0-9]{4})-?([0-9]{4})$/;
+
+              if (!check.test(value))
+                return '알맞는 핸드폰 번호 형식을 입력 해주세요.';
+
+              setValue(
+                'phoneNumber',
+                value
+                  .replace(/^(\d{3})(\d{4})(\d{4})$/g, '$1-$2-$3')
+                  .replace(/-{1,2}$/g, '')
+              );
+            },
           })}
         />
         <RangePicker label="날짜" className="mb-4" />

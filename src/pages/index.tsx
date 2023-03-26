@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import axios from 'axios';
-import tw from 'twin.macro';
-import styled from '@emotion/styled';
-import { Button } from 'antd';
 import { BaseLayout } from '@components/layout';
+import FormGroup from '@components/formGroup';
 
 export default function Home() {
   const fetchData = async () => {
@@ -27,23 +25,9 @@ export default function Home() {
 
   return (
     <BaseLayout>
-      <main className="flex flex-col border border-red-500 bg-light">
-        헬로월드
-        <Input placeholder="box" />
-        <MyDiv>Test Text</MyDiv>
-        <Button type="primary">Button</Button>
-      </main>
+      <div className="flex flex-col space-y-12">
+        <FormGroup />
+      </div>
     </BaseLayout>
   );
 }
-
-const height = '72px';
-
-const Input = tw.input`
-    text-center border h-[${height}] bg-gray-200
-`;
-const MyDiv = styled.div`
-  background: gold;
-  font-size: 2rem;
-  margin-top: 10px;
-`;

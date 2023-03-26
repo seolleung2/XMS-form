@@ -109,8 +109,8 @@ const FormGroup: FunctionComponent = () => {
         })}
       >
         <div className="formGroup">
-          <div className="flex flex-col flex-wrap">
-            <div>
+          <div className="flex flex-col flex-wrap space-y-4 lg:flex-row lg:flex-nowrap lg:space-x-6 lg:space-y-0">
+            <div className="lg:w-1/3">
               <Input
                 label="이름"
                 id="name"
@@ -191,7 +191,7 @@ const FormGroup: FunctionComponent = () => {
                 })}
               />
             </div>
-            <div className="loadPlaceWrapper flex grow flex-col space-y-2">
+            <div className="loadPlaceWrapper flex grow flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 lg:items-center">
               {fields.map((field, index) => {
                 const loadPlaceErrors = errors['loadPlace'] as
                   | FieldValues

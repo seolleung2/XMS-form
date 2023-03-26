@@ -10,6 +10,4 @@ async function initMocks() {
   }
 }
 
-initMocks();
-
-export {};
+export { initMocks as setupMocks };

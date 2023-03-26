@@ -1,27 +1,18 @@
 import React, { FunctionComponent } from 'react';
-import { useForm } from 'react-hook-form';
+import { FieldValues, useFormContext } from 'react-hook-form';
 import Input from '@components/input';
 import Button from '@components/button';
-
-interface IForm {
-  name: string;
-  phoneNumber: string;
-}
+import RangePicker from '@components/rangePicker';
 
 const FormGroup: FunctionComponent = () => {
+  const methods = useFormContext();
   const {
     register,
     handleSubmit,
-    formState: { isDirty, errors },
-  } = useForm<IForm>({
-    mode: 'all',
-    defaultValues: {
-      name: '',
-      phoneNumber: '',
-    },
-  });
+    formState: { isDirty, errors, isSubmitting },
+  } = methods;
 
-  const onSubmit = (data: IForm) => {
+  const onSubmit = (data: FieldValues) => {
     const { name, phoneNumber } = data;
 
     const body = {
@@ -63,6 +54,7 @@ const FormGroup: FunctionComponent = () => {
             required: '전화번호는 필수 입력입니다.',
           })}
         />
+        <RangePicker label="날짜" className="mb-4" />
       </div>
       <div className="addButton mt-1.5">
         <Button text="등록" className="" />

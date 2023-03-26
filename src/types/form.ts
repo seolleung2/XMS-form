@@ -1,3 +1,22 @@
+export interface FormFields {
+  name: string;
+  phoneNumber: string;
+  fromDate: number;
+  toDate: number;
+  item: string;
+  itemDetail: string;
+  supply: string;
+  supplyDetail: string;
+  address: string;
+  loadPlace: LoadPlaceFields[];
+}
+
+export interface LoadPlaceFields {
+  name: string;
+  address: string;
+  date: number;
+}
+
 export interface ReqBody {
   name: string;
   phoneNumber: string;

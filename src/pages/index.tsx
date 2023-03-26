@@ -3,6 +3,7 @@ import axios from 'axios';
 import tw from 'twin.macro';
 import styled from '@emotion/styled';
 import { Button } from 'antd';
+import { BaseLayout } from '@components/layout';
 
 export default function Home() {
   const fetchData = async () => {
@@ -25,12 +26,14 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col border border-red-500 bg-light">
-      헬로월드
-      <Input placeholder="box" />
-      <MyDiv>Test Text</MyDiv>
-      <Button type="primary">Button</Button>
-    </main>
+    <BaseLayout>
+      <main className="flex flex-col border border-red-500 bg-light">
+        헬로월드
+        <Input placeholder="box" />
+        <MyDiv>Test Text</MyDiv>
+        <Button type="primary">Button</Button>
+      </main>
+    </BaseLayout>
   );
 }
 

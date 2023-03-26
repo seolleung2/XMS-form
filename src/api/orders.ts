@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PageType } from 'types/form';
+import { PageType, ReqBody } from 'types/form';
 
 export const getOrders = async ({ page, size }: PageType) => {
   const { data } = await axios.get('/orders', {
@@ -10,4 +10,10 @@ export const getOrders = async ({ page, size }: PageType) => {
   });
 
   return data.data;
+};
+
+export const addOrder = async (body: ReqBody) => {
+  const { data } = await axios.post('/order', body);
+
+  return data;
 };

@@ -9,14 +9,20 @@ import Modal from '@components/modal';
 import RangePicker from '@components/rangePicker';
 import SelectInput from '@components/selectInput';
 import DatePickerField from '@components/datePicker';
-import { ITEM_SELECTION, SUPPLY_SELECTION } from 'constant/form';
+import {
+  ITEM_SELECTION,
+  SUPPLY_SELECTION,
+  DEFAULT_VALUES,
+} from 'constant/form';
 import { LoadPlaceFields } from 'types/form';
 import { cls } from 'utils';
+import { useAddOrderMutation } from 'hooks/api/orders';
 
 const FormGroup: FunctionComponent = () => {
   const methods = useFormContext();
   const {
     register,
+    reset,
     handleSubmit,
     watch,
     clearErrors,
@@ -30,10 +36,25 @@ const FormGroup: FunctionComponent = () => {
     name: 'loadPlace',
   });
 
+  const [responseModalOpen, setResponseModalOpen] = useState<boolean>(false);
+  const [responseMessage, setResponseMessage] = useState<string>('');
   const [openPostcode, setOpenPostcode] = useState<boolean>(false);
   const [addressInputId, setAddressInputId] = useState<string>('');
   const [itemField, itemDetailField] = watch(['item', 'itemDetail']);
   const [supplyField, supplyDetailField] = watch(['supply', 'supplyDetail']);
+
+  const { mutate } = useAddOrderMutation((response) => {
+    if (response.success) {
+      initializeFormStatus();
+      const { data } = response;
+      setResponseModalOpen(true);
+      setResponseMessage(JSON.stringify(data));
+    }
+  });
+
+  const initializeFormStatus = () => {
+    reset(DEFAULT_VALUES);
+  };
 
   const onSubmit = (data: FieldValues) => {
     const {
@@ -78,6 +99,7 @@ const FormGroup: FunctionComponent = () => {
     };
 
     console.log('body', body);
+    mutate(body);
   };
 
   const handleOpenPostcodeModal = (addressId: string) => {

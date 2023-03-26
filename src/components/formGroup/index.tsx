@@ -36,6 +36,8 @@ const FormGroup: FunctionComponent = () => {
     name: 'loadPlace',
   });
 
+  const [isDisabledSubmitBtn, setIsDisabledSubmitBtn] =
+    useState<boolean>(false);
   const [responseModalOpen, setResponseModalOpen] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>('');
   const [openPostcode, setOpenPostcode] = useState<boolean>(false);
@@ -56,7 +58,7 @@ const FormGroup: FunctionComponent = () => {
     reset(DEFAULT_VALUES);
   };
 
-  const onSubmit = (data: FieldValues) => {
+  const onSubmit = async (data: FieldValues) => {
     const {
       name,
       phoneNumber,
@@ -100,11 +102,20 @@ const FormGroup: FunctionComponent = () => {
 
     console.log('body', body);
     mutate(body);
+
+    await new Promise((r) => setTimeout(r, 1000));
+    remove([1, 2]);
+    setIsDisabledSubmitBtn(false);
   };
 
   const handleOpenPostcodeModal = (addressId: string) => {
     setAddressInputId(addressId);
     setOpenPostcode(true);
+  };
+
+  const handleCloseResponseModal = () => {
+    setResponseModalOpen(false);
+    setResponseMessage('');
   };
 
   const handleSelectAddress = (address: { roadAddress: string }) => {
@@ -122,10 +133,12 @@ const FormGroup: FunctionComponent = () => {
     <>
       <form
         onSubmit={handleSubmit(async (data) => {
+          setIsDisabledSubmitBtn(true);
           await new Promise((r) => setTimeout(r, 1000));
           try {
             onSubmit(data);
           } catch (error) {
+            setIsDisabledSubmitBtn(false);
             console.log(error);
           }
         })}
@@ -305,7 +318,11 @@ const FormGroup: FunctionComponent = () => {
           </div>
         </div>
         <div className="addButton mt-1.5">
-          <Button text="등록" className="" />
+          <Button
+            text="등록"
+            className=""
+            disabled={isSubmitting || isDisabledSubmitBtn}
+          />
         </div>
       </form>
       {openPostcode && (
@@ -318,6 +335,14 @@ const FormGroup: FunctionComponent = () => {
               padding: '24px',
             }}
           />
+        </Modal>
+      )}
+      {responseModalOpen && responseMessage && (
+        <Modal title="요청 성공" onClose={handleCloseResponseModal}>
+          <div className="flex flex-col space-y-4 px-4 py-6">
+            <h3 className="text-lg font-semibold">등록이 완료 되었습니다.</h3>
+            <div>{responseMessage}</div>
+          </div>
         </Modal>
       )}
     </>

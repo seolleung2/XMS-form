@@ -60,6 +60,42 @@ export const handlers = [
       console.log(error);
     }
   }),
+  rest.delete('/order', async (req, res, ctx) => {
+    const data = await req.json();
+
+    const { ids: orderIds } = data;
+
+    if (!orderIds || orderIds.length < 1) {
+      return res(
+        ctx.status(404),
+        ctx.json({
+          success: false,
+          message: '주문 id를 찾을 수 없습니다.',
+          orderIds: [],
+        })
+      );
+    }
+
+    const targetIds = orders
+      .filter((order) => orderIds.includes(order.seqNo))
+      .map((order) => order.seqNo);
+
+    targetIds.forEach((targetId) => {
+      const targetIndex = orders.findIndex((order) => order.seqNo === targetId);
+      orders.splice(targetIndex, 1);
+    });
+
+    await sleep(200);
+
+    return res(
+      ctx.status(200),
+      ctx.json({
+        success: true,
+        message: '삭제가 완료 되었습니다.',
+        orderIds,
+      })
+    );
+  }),
 ];
 
 async function sleep(timeout: number) {

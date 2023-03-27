@@ -28,3 +28,20 @@ export const useAddOrderMutation = (
     },
   });
 };
+
+export const useDeleteOrderMutation = (
+  successCallback: (result: {
+    success: boolean;
+    message: string;
+    orderIds: number[];
+  }) => void
+) => {
+  const client = useQueryClient();
+  return useMutation((ids: number[]) => api.deleteOrder(ids), {
+    onSuccess: (result) => {
+      client
+        .invalidateQueries(['orderlist'])
+        .then(() => successCallback(result));
+    },
+  });
+};

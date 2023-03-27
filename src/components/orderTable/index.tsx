@@ -3,8 +3,9 @@ import { Table as AntdTable } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useFormContext } from 'react-hook-form';
 import styled from '@emotion/styled';
-import Button from 'components/button';
-import Modal from 'components/modal';
+import Button from '@components/button';
+import Modal from '@components/modal';
+import { useDeleteOrderMutation } from 'hooks/api/orders';
 import { ResponseType, OrderFields as DataType, PageType } from 'types/form';
 
 interface TableProps {
@@ -32,13 +33,29 @@ const ReceicivingCompleteTable: FunctionComponent<TableProps> = ({
   const methods = useFormContext();
   const { reset } = methods;
 
+  const { mutate } = useDeleteOrderMutation((response) => {
+    if (response.success) {
+      setSelectedRowKeys([]);
+      const { orderIds } = response;
+      setResponseModalOpen(true);
+      setResponseMessage(JSON.stringify(orderIds));
+      setIsDisabledDeleteBtn(false);
+    }
+  });
+
   const handleCloseResponseModal = () => {
     setResponseModalOpen(false);
     setResponseMessage('');
   };
 
-  const handleDeleteOrder = () => {
-    console.log('selectedRowKeys', selectedRowKeys);
+  const handleDeleteOrder = async () => {
+    if (!selectedRowKeys || selectedRowKeys.length === 0) {
+      alert('선택된 테이블 행이 없습니다.');
+      return null;
+    }
+
+    setIsDisabledDeleteBtn(true);
+    mutate(selectedRowKeys);
   };
 
   const handlePage = async (page: number) => {

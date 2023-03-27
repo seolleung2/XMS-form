@@ -9,16 +9,20 @@ import Modal from '@components/modal';
 import RangePicker from '@components/rangePicker';
 import SelectInput from '@components/selectInput';
 import DatePickerField from '@components/datePicker';
+import { useAddOrderMutation } from 'hooks/api/orders';
 import {
   ITEM_SELECTION,
   SUPPLY_SELECTION,
   DEFAULT_VALUES,
 } from 'constant/form';
-import { LoadPlaceFields } from 'types/form';
+import { LoadPlaceFields, PageType } from 'types/form';
 import { cls } from 'utils';
-import { useAddOrderMutation } from 'hooks/api/orders';
 
-const FormGroup: FunctionComponent = () => {
+interface Props {
+  setSearchInfo: React.Dispatch<React.SetStateAction<PageType>>;
+}
+
+const FormGroup: FunctionComponent<Props> = ({ setSearchInfo }) => {
   const methods = useFormContext();
   const {
     register,
@@ -100,9 +104,10 @@ const FormGroup: FunctionComponent = () => {
       loadPlace: loadingPlaceConversion,
     };
 
-    console.log('body', body);
     mutate(body);
-
+    setSearchInfo((prevState) => {
+      return { ...prevState, page: 1 };
+    });
     await new Promise((r) => setTimeout(r, 1000));
     remove([1, 2]);
     setIsDisabledSubmitBtn(false);

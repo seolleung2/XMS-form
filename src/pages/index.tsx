@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { BaseLayout } from '@components/layout';
 import FormGroup from '@components/formGroup';
@@ -24,6 +24,15 @@ export default function Home() {
     page: searchInfo.page,
     size: searchInfo.size,
   });
+
+  useEffect(() => {
+    if (orderlist && !orderlist['total']) {
+      setSearchInfo({
+        page: 1,
+        size: 20,
+      });
+    }
+  }, [orderlist]);
 
   return (
     <BaseLayout>

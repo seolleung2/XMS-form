@@ -17,3 +17,13 @@ export const addOrder = async (body: ReqBody) => {
 
   return data;
 };
+
+export const deleteOrder = async (ids: number[]) => {
+  const { data } = await axios.delete('/order', {
+    data: {
+      ids,
+    },
+  });
+
+  return data;
+};
